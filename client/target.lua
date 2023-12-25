@@ -1,67 +1,66 @@
-ESX = exports["es_extended"]:getSharedObject()
-
-
-CreateThread(function()
-    while true do
-        if Config.Target then
-            exports.ox_target:addSphereZone({
-                coords = vec3(Config.Demo.Target),
-                radius = 1,
-                debug = drawZones,
-                options = {
-                    {
-                        icon = 'fa-solid fa-eye',
-                        label = 'Fremvis et køretøj',
-                        -- groups = 'brugtvogn',
-                        onSelect = function()
-                            showcaseveh()
-                        end
-                    },
-                    {
-                        icon = 'fa-solid fa-money-bill',
-                        label = 'Sælg et køretøj',
-                        onSelect = function()
-                            sellveh()
-                        end
-                    }
-                }
-            })
-            break
+function FindVehicleByPlate(plate)
+    for _, displayedVehicle in ipairs(DisplayedVehicles) do
+        displayedVehicle[2] = string.gsub(displayedVehicle[2], " ", "")  -- Remove spaces
+        if displayedVehicle[2] == plate then
+            return displayedVehicle
         end
-
-        if Config.Menu then
-            --if ESX.PlayerData.Job == 'brugtvogn' then
-                if IsControlPressed(0, 38) then
-                    lib.showContext('brugtvogn_menu')
-                end
-            --end
-        end
-        Wait(100)
     end
-end)
+end
 
-lib.registerContext({
-    id = 'brugtvogn_menu',
-    title = 'Brugtvogns menu',
+exports.ox_target:addSphereZone({
+    coords = vec3(Config.Job.JobMenu),
+    radius = 1,
+    debug = drawZones,
     options = {
-      {
-        title = 'Byd på køretøjet',
-        description = 'Byd på et køretøj, ejet af en spiller',
-        icon = 'dollar',
-        onSelect = function()
-            print('veh in direction med input')
-        end
-      },
-    }
-  })
-
-  exports.ox_target:addGlobalVehicle({
-    {
-        icon = 'fa-solid fa-car',
-        label = 'Byd på køretøjet',
-        -- groups = 'brugtvogn',
-        onSelect = function()
-            print('byd input dialog')
-        end
+        {
+            icon = 'fa-solid fa-bars',
+            label = 'Åben menu',
+            groups = Config.Job.job,
+            onSelect = function()
+                MainMenu()
+            end
+        }
     }
 })
+
+exports.ox_target:addSphereZone({
+    coords = vec3(Config.Job.NPC.target),
+    radius = 1,
+    debug = drawZones,
+    options = {
+        {
+            icon = 'fa-solid fa-tag',
+            label = 'Sælg dit køretøj',
+            onSelect = function()
+                SellYourVehicle()
+            end
+        }
+    }
+})
+
+
+for _, spawnPoint in ipairs(Config.spawnPoints) do
+    exports.ox_target:addSphereZone({
+        coords = spawnPoint.coords,
+        radius = 1,
+        debug = drawZones,
+        options = {
+            {
+                icon = 'fa-solid fa-circle-info',
+                label = 'Informationer',
+                onSelect = function()
+                    local vehicleInDirection = ESX.Game.GetVehicleInDirection()
+                    local targetPlate = GetVehicleNumberPlateText(vehicleInDirection)
+                    targetPlate = string.gsub(targetPlate, " ", "")  -- Remove spaces
+                    
+                    local VehicleData = FindVehicleByPlate(targetPlate)
+                    
+                    if VehicleData then
+                        local model, plate, price = VehicleData[1], VehicleData[2], VehicleData[3]
+                        StartUI(model, plate, price)
+                    end
+                end
+            },
+        }
+    })
+end

@@ -7,7 +7,8 @@ lua54 'yes'
 
 shared_scripts {
     '@ox_lib/init.lua',
-    'config.lua'
+    'config.lua',
+    '@es_extended/imports.lua'
 }
 
 server_scripts {
@@ -19,3 +20,6 @@ client_scripts {
     'client/*'
 }
 
+ui_page { 'ui/index.html' }
+
+files { 'ui/index.html', 'ui/index.css', 'ui/index.js', 'ui/debounce.min.js', 'ui/img/*'}
