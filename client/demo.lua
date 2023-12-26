@@ -7,32 +7,33 @@ function SpawnVehicle(veh, plate, price, model)
         local spawnCoords = spawnPoint.coords
         local radius = spawnPoint.radius
         local isSpawnPointClear = ESX.Game.IsSpawnPointClear(spawnCoords, radius)
-		local display = 1
+        local display = 1
   
         if isSpawnPointClear then
-			ESX.Game.SpawnVehicle(veh, spawnCoords, spawnPoint.heading, function(vehicle)
-				SetVehicleNumberPlateText(vehicle, plate)
-				notifyBilHentet(plate)
-				FreezeEntityPosition(vehicle, true)
-				SetVehicleDoorsLocked(vehicle, 2)
-				local VehicleData = {
-					model,
-					plate,
-					price
-				}
-				table.insert(DisplayedVehicles, VehicleData)
-				TriggerServerEvent('th-brugtvogn:ChangeVehicleDisplay', display, plate)
-				
-			end)		
+            ESX.Game.SpawnVehicle(veh, spawnCoords, spawnPoint.heading, function(vehicle)
+                SetVehicleNumberPlateText(vehicle, plate)
+                notifyBilHentet(plate)
+                FreezeEntityPosition(vehicle, true)
+                SetVehicleDoorsLocked(vehicle, 2)
+                local VehicleData = {
+                    model,
+                    plate,
+                    price
+                }
+                table.insert(DisplayedVehicles, VehicleData)
+                TriggerServerEvent('th-brugtvogn:SaveDisplayedVehicles', DisplayedVehicles)
+                TriggerServerEvent('th-brugtvogn:ChangeVehicleDisplay', display, plate)
+            end)       
             spawnedCar = true
             break
         end
     end
 
     if not spawnedCar then
-		notifyBilIkkePlads()
+        notifyBilIkkePlads()
     end
 end
+
 
 function SpawnSoldVehicle(playerId, veh, plate)
 	local spawnedCar = false
@@ -64,24 +65,24 @@ function SpawnSoldVehicle(playerId, veh, plate)
 end
 
 function RemoveVehicle(nummerplade)
-	local VehiclesInArea = ESX.Game.GetVehicles()
-	print(json.encode(VehiclesInArea))
-	
-	for _, vehicle in pairs(VehiclesInArea) do
-		local currentPlate = GetVehicleNumberPlateText(vehicle)
-		currentPlate = string.gsub(currentPlate, " ", "")  -- Remove spaces
-		nummerplade = string.gsub(nummerplade, " ", "")  -- Remove spaces
-	
-		if DoesEntityExist(vehicle) then
-			if currentPlate == nummerplade then
-				SetEntityAsNoLongerNeeded(vehicle)
-				ESX.Game.DeleteVehicle(vehicle)
-				print('removed')
-				break
-			end
-		end
-	end
-end	
+    local VehiclesInArea = ESX.Game.GetVehicles()
+
+    for _, vehicle in pairs(VehiclesInArea) do
+        if DoesEntityExist(vehicle) and NetworkHasControlOfEntity(vehicle) then
+            local currentPlate = GetVehicleNumberPlateText(vehicle)
+            currentPlate = string.gsub(currentPlate, " ", "")  -- Remove spaces
+            nummerplade = string.gsub(nummerplade, " ", "")  -- Remove spaces
+
+            if currentPlate == nummerplade then
+                SetEntityAsNoLongerNeeded(vehicle)
+                ESX.Game.DeleteVehicle(vehicle)
+                print('removed')
+                break
+            end
+        end
+    end
+end
+
 
 function ShowcasedStock()
 	ESX.TriggerServerCallback('th-brugtvogn:GetDisplayedVehicles', function(data)

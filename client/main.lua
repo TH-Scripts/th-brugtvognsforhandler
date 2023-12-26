@@ -1,4 +1,16 @@
 local spawnped = false
+local isBoss = nil
+
+RegisterNetEvent('esx:setJob')
+AddEventHandler('esx:setJob', function(job)
+    if job.name == Config.Job.job then
+        if job.grade_name == 'boss' then
+            isBoss = false
+        else
+            isBoss = true
+        end
+    end
+end)
 
 function MainMenu()
   lib.registerContext({
@@ -17,6 +29,7 @@ function MainMenu()
           title = 'Bossmenu',
           description = 'Åben bossmenuen',
           icon = 'star',
+          disabled = isBoss,
           onSelect = function()
             TriggerEvent('esx_society:openBossMenu', Config.Job.job, function (data, menu)
             end) 
@@ -118,10 +131,10 @@ function SellYourVehicle()
                 local HashKey = string.lower(GetDisplayNameFromVehicleModel(vehicleHash))
                 table.insert(elements, {
                     title = 'Køretøj: '..HashKey,
-                    description = 'Nummerplade: '..v.plate..' \nBiltype: '..v.type..' \nKilometer '..v.mileage..' \nKlik for at sælge dit køretøj',
+                    description = 'Nummerplade: '..v.plate..' \nBiltype: '..v.type..' \nKlik for at sælge dit køretøj',
                     icon = 'car',
                     onSelect = function()
-                        OpenSellVehicleDialogue(HashKey, v.plate, v.mileage)
+                        OpenSellVehicleDialogue(HashKey, v.plate)
                     end
                 })
 
@@ -139,7 +152,7 @@ function SellYourVehicle()
     end)
 end
 
-function OpenSellVehicleDialogue(navn, plate, mileage)
+function OpenSellVehicleDialogue(navn, plate)
     local CanSellVehicle = false
     local input = lib.inputDialog('Køretøjet: '..navn, {
         {type = 'number', label = 'Pris', description = 'Angiv en pris på '..plate, icon = tag, max = Config.VehicleMaxPrice, min = Config.VehicleMinPrice},
@@ -164,9 +177,8 @@ function OpenSellVehicleDialogue(navn, plate, mileage)
 
     if alert == 'confirm' then
         CanSellVehicle = true
-        --TriggerServerEvent('th-brugtvogn:InsertIntoSales', CanSellVehicle, navn, plate, mileage, input[1])
         ESX.TriggerServerCallback('th-brugtvogn:GetBrugtvognPlayers', function(data)
-        end, navn, plate, mileage, input[1])
+        end, navn, plate, input[1])
     else
         return
     end
@@ -228,10 +240,11 @@ function SellEventFunction(playerId, firstName, lastName, seller, model, nummerp
     end  
 end
 
-RegisterNetEvent('th-brugtvogn:NotifyBuyer', function(navn, plate, mileage, price)
+RegisterNetEvent('th-brugtvogn:NotifyBuyer', function(navn, plate, price, target)
+    print(target)
     local alert = lib.alertDialog({
         header = 'Køb af køretøj!',
-        content = 'Ønsker du at købe bil modellen '..navn..' med nummerpladen '..plate..' som har kørt '..mileage.. ' kilometer \n\n Prisen for køretøjet er '..price..' DKK' ,
+        content = 'Ønsker du at købe bil modellen '..navn..' med nummerpladen '..plate..'\n\n Prisen for køretøjet er '..price..' DKK' ,
         centered = true,
         cancel = true,
         labels = {
@@ -241,7 +254,14 @@ RegisterNetEvent('th-brugtvogn:NotifyBuyer', function(navn, plate, mileage, pric
     })    
 
     if alert == 'confirm' then
-        TriggerServerEvent('th-brugtvogn:AddVehicleToCurrentStock', navn, plate, price)
+        ESX.TriggerServerCallback('th-brugtvogn:CheckSocietyBalance', function(money)
+            if money then
+                TriggerServerEvent('th-brugtvogn:AddVehicleToCurrentStock', navn, plate, price, target)
+                notifyVehicleBoughtFromEmployee(navn, plate, price)
+            else
+                notifyNoMoney()
+            end
+        end, price)
     else
         return
     end
@@ -260,10 +280,21 @@ RegisterNetEvent('th-brugtvogn:CustomerConfirmationAlert', function(playerId, se
     }) 
 
     if alert == 'confirm' then
-        SpawnSoldVehicle(playerId, model, nummerplade)
+        ESX.TriggerServerCallback('th-brugtvogn:RemoveMoneyFromBuyer', function(money)
+            if money then
+                SpawnSoldVehicle(playerId, model, nummerplade)
+                notifyVehicleBought(model, nummerplade)
+            else
+                notifyNoMoney()
+            end
+        end, pris)
     else
         return
     end
+end)
+
+RegisterNetEvent('th-brugtvogn:NotifySellerOfVehiclePurchase', function(model, plate, price)
+    notifyVehicleSoldFromPlayer(model, plate, price)
 end)
 
 CreateThread(function()

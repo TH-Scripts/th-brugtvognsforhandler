@@ -63,3 +63,47 @@ function notifyNoPlayers()
         iconColor = '#C53030'
     })
 end
+
+function notifyNoMoney()
+    lib.notify({
+        id = 'biler5',
+        title = 'Mangler penge',
+        position = Config.Notify.position,
+        style = Config.Notify.Style,
+        icon = 'money-bill',
+        iconColor = '#C53030'
+    })
+end
+
+function notifyVehicleBought(model, nummerplade)
+    lib.notify({
+        id = 'biler5',
+        title = 'Du har købt en '..model..' med nummerpladen '..nummerplade..'!',
+        position = Config.Notify.position,
+        style = Config.Notify.Style,
+        icon = 'car',
+        iconColor = '#0afc12'
+    })
+end
+
+function notifyVehicleSoldFromPlayer(model, plate, price)
+    lib.notify({
+        id = 'biler5',
+        title = 'Din '..model..' med nummerpladen '..plate..' er blevet købt til '..price..' DKK',
+        position = Config.Notify.position,
+        style = Config.Notify.Style,
+        icon = 'car',
+        iconColor = '#0afc12'
+    })
+end
+
+function notifyVehicleBoughtFromEmployee(model, plate, price)
+    lib.notify({
+        id = 'biler5',
+        title = 'Du har købt '..model..' med nummerpladen '..plate..' til '..price..' DKK',
+        position = Config.Notify.position,
+        style = Config.Notify.Style,
+        icon = 'car',
+        iconColor = '#0afc12'
+    })
+end

@@ -46,4 +46,11 @@ Config.spawnPoints = {
 
 Config.SpawnSoldVehicle = {
     {coords = vector3(1247.0443, 2714.3398, 38.0060), heading =173.9332, radius = 3},
- }
+}
+
+Config.Vehicles = {
+    Almen = {
+        'blista',
+        'neon'
+    }
+}

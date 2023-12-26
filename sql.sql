@@ -8,6 +8,7 @@ CREATE TABLE IF NOT EXISTS `th_brugtvogn_lager` (
   `model` varchar(50) DEFAULT NULL,
   `nummerplade` varchar(50) NOT NULL DEFAULT '',
   `pris` int(11) DEFAULT NULL,
+  `displayed` int(11) DEFAULT '0',
   PRIMARY KEY (`nummerplade`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_general_ci;
 

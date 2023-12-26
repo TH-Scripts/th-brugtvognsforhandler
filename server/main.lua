@@ -1,3 +1,5 @@
+DisplayVehicles = {}
+
 AddEventHandler('onResourceStart', function()
     local displayed = 0
     local table = MySQL.update.await('UPDATE th_brugtvogn_lager SET displayed = ? WHERE displayed = 1', {
@@ -5,15 +7,10 @@ AddEventHandler('onResourceStart', function()
     })
 end)
 
-TriggerEvent('esx_society:registerSociety', Config.Job.job, Config.Job.job, Config.Job.Society, Config.Job.Society, Config.Job.Society, {type = 'public'})
+TriggerEvent('esx_society:registerSociety', Config.Job.job, Config.Job.job, Config.Job.society, Config.Job.society, Config.Job.society, {type = 'public'})
 
 ESX.RegisterServerCallback('th-brugtvogn:getDB', function(src, cb)
     local table = MySQL.query.await('SELECT model, nummerplade, pris, displayed FROM th_brugtvogn_lager')    
-    cb(table)
-end)
-
-ESX.RegisterServerCallback('th-brugtvogn:GetVehicleOpportunities', function(src, cb)
-    local table = MySQL.query.await('SELECT model, plate, pris, mileage, license, name FROM th_brugtvogn_buy')    
     cb(table)
 end)
 
@@ -22,11 +19,16 @@ ESX.RegisterServerCallback('th-brugtvogn:GetDisplayedVehicles', function(source,
     cb(table)
 end)
 
-RegisterNetEvent('th-brugtvogn:ChangeVehicleDisplay', function(CurrentDisplay, plate)
+RegisterNetEvent('th-brugtvogn:SaveDisplayedVehicles', function(DisplayedVehicles)
+    DisplayVehicles = DisplayedVehicles
+    TriggerClientEvent('th-brugtvogn:GetDisplayedVehicles', -1, DisplayVehicles)
+end)
+
+RegisterNetEvent('th-brugtvogn:ChangeVehicleDisplay', function(CurrentDisplay, plate, displayedVehicles)
     if not HasAccessToJob(source) then
         return
     end
-
+    
     MySQL.update.await('UPDATE th_brugtvogn_lager SET displayed = ? WHERE nummerplade = ?', {
         CurrentDisplay, plate
     })
@@ -44,7 +46,15 @@ RegisterNetEvent('th-brugtvogn:ChangePrice', function(NewPrice, plate)
 end)
 
 
-RegisterNetEvent('th-brugtvogn:AddVehicleToCurrentStock', function(model, plate, price)
+RegisterNetEvent('th-brugtvogn:AddVehicleToCurrentStock', function(model, plate, price, target)
+    local xTarget = ESX.GetPlayerFromId(target)
+    
+    if not xTarget then
+        return 
+    end
+
+    xTarget.addAccountMoney('bank', price)
+
     MySQL.insert('INSERT INTO th_brugtvogn_lager (model, nummerplade, pris) VALUES (?, ?, ?)', {
         model, plate, price
     })
@@ -52,6 +62,10 @@ RegisterNetEvent('th-brugtvogn:AddVehicleToCurrentStock', function(model, plate,
     MySQL.Async.execute('DELETE FROM owned_vehicles WHERE plate = ?', {
         plate
     })
+
+    TriggerClientEvent('th-brugtvogn:NotifySellerOfVehiclePurchase', target, model, plate, price)
+
+
 end)
 
 
@@ -59,20 +73,50 @@ ESX.RegisterServerCallback('th-brugtvogn:SellYourVehicle', function(source, cb)
     local xPlayer = ESX.GetPlayerFromId(source)
 
 
-    local table = MySQL.Sync.fetchAll('SELECT plate, vehicle, type, mileage FROM owned_vehicles WHERE owner = ?', {
+    local table = MySQL.Sync.fetchAll('SELECT plate, vehicle, type FROM owned_vehicles WHERE owner = ?', {
         xPlayer.identifier
     })
     cb(table)
 end)
 
-ESX.RegisterServerCallback('th-brugtvogn:GetBrugtvognPlayers', function(source, cb, navn, plate, mileage, price)
+ESX.RegisterServerCallback('th-brugtvogn:GetBrugtvognPlayers', function(source, cb, navn, plate, price)
 
+    local xTarget = source
+    
     local GetAllPlayers = ESX.GetExtendedPlayers('job', Config.Job.job)
 
     for _, xPlayer in pairs(GetAllPlayers) do
         local buyer = xPlayer.source
-        TriggerClientEvent('th-brugtvogn:NotifyBuyer', buyer, navn, plate, mileage, price)
+        TriggerClientEvent('th-brugtvogn:NotifyBuyer', buyer, navn, plate, price, xTarget)
         cb(true)
+    end 
+end)
+
+ESX.RegisterServerCallback('th-brugtvogn:CheckSocietyBalance', function(source, cb, amount)
+    TriggerEvent('esx_addonaccount:getSharedAccount', Config.Job.society, function(account)
+        if account.money >= amount then
+            account.removeMoney(amount)
+            cb(true)
+        else
+            cb(false)
+        end
+    end)
+end)
+
+
+ESX.RegisterServerCallback('th-brugtvogn:RemoveMoneyFromBuyer', function(source, cb, amount)
+    local xPlayer = ESX.GetPlayerFromId(source)
+
+    local PlayerBank = xPlayer.getAccount('bank')
+
+    if PlayerBank.money >= amount then
+        TriggerEvent('esx_addonaccount:getSharedAccount', Config.Job.society, function(account)
+            account.addMoney(amount)
+        end)
+        xPlayer.removeAccountMoney('bank', amount)
+        cb(true)
+    else
+        cb(false)
     end 
 end)
 
