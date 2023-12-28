@@ -1,9 +1,5 @@
 Config = {}
 
-Config.Target = true
-Config.Menu = true
-Config.VehicleMaxPrice = 10000000
-Config.VehicleMinPrice = 1000
 Config.Job = {
     job = 'brugtvogn',
 
@@ -18,6 +14,9 @@ Config.Job = {
         hashmodel = 'a_f_m_eastsa_01'
     },
 }
+
+Config.VehicleMaxPrice = 10000000
+Config.VehicleMinPrice = 1000
 
 -- Notify styles
 Config.Notify = {
@@ -46,11 +45,4 @@ Config.spawnPoints = {
 
 Config.SpawnSoldVehicle = {
     {coords = vector3(1247.0443, 2714.3398, 38.0060), heading =173.9332, radius = 3},
-}
-
-Config.Vehicles = {
-    Almen = {
-        'blista',
-        'neon'
-    }
 }

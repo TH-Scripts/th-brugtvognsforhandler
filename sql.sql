@@ -1,7 +1,7 @@
---------------------------------------------------
+--
 -- TH - DEVELOPMENT
 -- ALL RIGHTS RESERVED 
---------------------------------------------------
+--
 
 
 CREATE TABLE IF NOT EXISTS `th_brugtvogn_lager` (
@@ -14,9 +14,9 @@ CREATE TABLE IF NOT EXISTS `th_brugtvogn_lager` (
 
 
 
---------------------------------------------------
+--
 -- Job SQL - ignorer hvis du allerede har et job inde
---------------------------------------------------
+--
 
 INSERT INTO `addon_account` (name, label, shared) VALUES
 	('society_brugtvogn', 'Brugtvogn', 1)

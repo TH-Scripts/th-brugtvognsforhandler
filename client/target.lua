@@ -5,8 +5,6 @@ RegisterNetEvent('th-brugtvogn:GetDisplayedVehicles', function(DisplayedVehicles
 end)
 
 function FindVehicleByPlate(plate)
-    print(json.encode(onDisplay))
-
     for _, displayedVehicle in ipairs(onDisplay) do
         displayedVehicle[2] = string.gsub(displayedVehicle[2], " ", "")  -- Remove spaces
         if displayedVehicle[2] == plate then
@@ -59,7 +57,6 @@ for _, spawnPoint in ipairs(Config.spawnPoints) do
                 onSelect = function()
                     local vehicleInDirection = ESX.Game.GetVehicleInDirection()
                     local targetPlate = GetVehicleNumberPlateText(vehicleInDirection)
-                    print(targetPlate)
                     targetPlate = string.gsub(targetPlate, " ", "")  -- Remove spaces
                     
                     local VehicleData = FindVehicleByPlate(targetPlate)

@@ -76,7 +76,6 @@ function RemoveVehicle(nummerplade)
             if currentPlate == nummerplade then
                 SetEntityAsNoLongerNeeded(vehicle)
                 ESX.Game.DeleteVehicle(vehicle)
-                print('removed')
                 break
             end
         end

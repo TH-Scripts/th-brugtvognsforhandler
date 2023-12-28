@@ -168,7 +168,6 @@ RegisterNetEvent('th-brugtvogn:GetCustomerConfirm', function(playerId, seller, m
 end)
 
 
--- Function to check if player has access to the job
 function HasAccessToJob(playerId)
     local xPlayer = ESX.GetPlayerFromId(playerId)
 
@@ -180,8 +179,6 @@ function HasAccessToJob(playerId)
         return true
     end
 
-    -- Probably a cheater, perfect place for a ban/log, but I'll leave that up to you
-    -- DropPlayer(playerId, 'Cheating')
     print(('th-brugtvogn: %s attempted to trigger an action!'):format(xPlayer.identifier))
 
     return false

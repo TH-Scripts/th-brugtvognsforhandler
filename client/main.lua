@@ -241,7 +241,6 @@ function SellEventFunction(playerId, firstName, lastName, seller, model, nummerp
 end
 
 RegisterNetEvent('th-brugtvogn:NotifyBuyer', function(navn, plate, price, target)
-    print(target)
     local alert = lib.alertDialog({
         header = 'Køb af køretøj!',
         content = 'Ønsker du at købe bil modellen '..navn..' med nummerpladen '..plate..'\n\n Prisen for køretøjet er '..price..' DKK' ,
