@@ -15,7 +15,7 @@ Config.Job = {
     },
 }
 
-Config.VehicleDoorLockSystem = 'custom' -- t1ger_keys / mono_carkeys / custom
+Config.VehicleDoorLockSystem = 't1ger' -- 't1ger' (T1ger Keys) 'mono_carkeys' (Mono Carkeys) 'custom' (Indsæt eget vehicle doorlock system)
 
 Config.VehicleMaxPrice = 10000000
 Config.VehicleMinPrice = 1000
