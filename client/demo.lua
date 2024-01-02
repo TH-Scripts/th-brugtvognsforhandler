@@ -50,6 +50,8 @@ function SpawnSoldVehicle(playerId, veh, plate)
 				TriggerServerEvent('th-brugtvogn:AddVehicleToPlayersGarage', playerId, plate, vehicleProps)
 				if Config.VehicleDoorLockSystem == 't1ger' then
 					exports['t1ger_keys']:UpdateKeysToDatabase(plate, true)
+				elseif Config.VehicleDoorLockSystem == 'mono_carkeys' then 
+					TriggerServerEvent('mono_carkeys:CreateKey', plate)
 				elseif Config.VehicleDoorLockSystem == 'custom' then 
 					-- skriv eget vehiclekey export her
 				end
@@ -63,6 +65,7 @@ function SpawnSoldVehicle(playerId, veh, plate)
 		notifyBilIkkePlads()
     end
 end
+
 
 function RemoveVehicle(nummerplade)
     local VehiclesInArea = ESX.Game.GetVehicles()
