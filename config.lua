@@ -15,6 +15,8 @@ Config.Job = {
     },
 }
 
+Config.VehicleDoorLockSystem = 'custom' -- t1ger_keys / mono_carkeys / custom
+
 Config.VehicleMaxPrice = 10000000
 Config.VehicleMinPrice = 1000
 
